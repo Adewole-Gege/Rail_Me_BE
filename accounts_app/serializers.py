@@ -14,16 +14,29 @@ from django.core.exceptions import ValidationError
 
 
 class PassengerRegistrationSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, required=True)
+    password = serializers.CharField(write_only=True, required=True, error_messages={'required': 'Passenger must input a password'})
+    email = serializers.EmailField(required=True, error_messages={'required': 'An email must be provided'})
+    phone_number = serializers.CharField(required=True, error_messages={'required': 'Passenger must provide a phone number'})
+    first_name = serializers.CharField(required=True, error_messages={'required': 'First name is required'})
+    last_name = serializers.CharField(required=True, error_messages={'required': 'Last name is required'})
 
     class Meta: # Meta class adds additional info for the main class which is PassengerRegistrationSerializer
         model = Passenger
         fields = ['email', 'phone_number', 'first_name', 'last_name', 'password']
 
-    def validate_password(self, value):
-        if len(value) < 12:
-            raise serializers.ValidationError("Password must be at least 12 characters long.") 
-        return value
+    def validate(self, attrs):
+        errors = {}
+        phone = attrs.get('phone_number')
+        
+        if not phone.isdigit() or len(phone) < 10:
+            errors['phone_number'] = "Phone number must be at least 10 digits."
+        
+        password = attrs.get('password')
+        if len(password) < 12:
+            errors['password'] = "Password must be at least 12 characters long."
+        if errors:
+            raise serializers.ValidationError(errors)
+        return attrs
 
 
     def create(self, validated_data): # validated_data is the data that has been validated by the serializer
@@ -169,5 +182,4 @@ class ResetPasswordSerializer(serializers.Serializer):
         user.save()
 
         return user
-    
     

@@ -10,14 +10,6 @@ class PassengerManager(BaseUserManager):
     def create_user(self, email, phone_number, first_name, last_name, password=None):
         if not email:
             raise ValueError("Email is required")
-        if not phone_number:
-            raise ValueError("Phone number is required")
-        if not first_name:
-            raise ValueError("First name is required")
-        if not last_name:
-            raise ValueError("Last name is required")
-        if not password:
-            raise ValueError("Please provide a password")
 
         email = self.normalize_email(email)
         passenger = self.model(
@@ -31,7 +23,7 @@ class PassengerManager(BaseUserManager):
         return passenger
 
     def create_superuser(self, email, phone_number, first_name, last_name, password=None):
-        passenger = self.create_passenger(email, phone_number, first_name, last_name, password)
+        passenger = self.create_user(email, phone_number, first_name, last_name, password)
         passenger.is_staff = True
         passenger.is_superuser = True
         passenger.save(using=self._db)
@@ -40,13 +32,13 @@ class PassengerManager(BaseUserManager):
     
 class Passenger(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
-    phone_number = models.CharField(max_length=11, unique=True)
+    phone_number = models.CharField(max_length=15, unique=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
-    is_verified = models.BooleanField(default=False)  # New field to track verification status
+    is_verified = models.BooleanField(default=False)  # field to track verification status
 
     objects = PassengerManager() # tells django not to use the default user manager (objects) but to use the custom PassengerManager instead
     
