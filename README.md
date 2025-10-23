@@ -25,7 +25,6 @@ All endpoints are **secured with JWT authentication**, except for **signup** and
 - Upload new train reservations (with train and coach images)
 - View total number of bookings on the platform
 
-
 ## Tech Stack
 - **Backend Framework:** Django & Django REST Framework (DRF)
 - **Authentication:** JWT (via `djangorestframework-simplejwt`)
