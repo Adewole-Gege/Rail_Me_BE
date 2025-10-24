@@ -11,6 +11,8 @@ from django.utils.encoding import smart_bytes, force_str
 from datetime import timedelta
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
+from django.core.mail import send_mail, BadHeaderError
+from smtplib import SMTPRecipientsRefused, SMTPException
 
 
 class PassengerRegistrationSerializer(serializers.ModelSerializer):
@@ -73,7 +75,8 @@ class OTPRequestSerializer(serializers.Serializer):
             if not user:
                 raise serializers.ValidationError({"error": "No account found with this email address."})
 
-            send_mail(
+            try:
+                send_mail(
                 subject="Rail-me Email Verification Code",
                 message=(
                     f"Dear {user.first_name},\n\n"
@@ -84,6 +87,10 @@ class OTPRequestSerializer(serializers.Serializer):
                 recipient_list=[target],
                 fail_silently=False,
             )
+            except SMTPRecipientsRefused:
+                raise serializers.ValidationError({"error": "Recipient email temporarily unavailable. Try again later."})
+            except (BadHeaderError, SMTPException) as i:
+                raise serializers.ValidationError({"error": f"Email sending failed: {str(i)}"})
 
             return {"message": "OTP sent successfully via email."}
 
