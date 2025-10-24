@@ -2,7 +2,7 @@ from django.db import models
 from admin_app.models import Train
 from datetime import timedelta
 
-
+# Create models here
 TRAIN_DURATIONS = {
     'Rail-Me Express 001': 11,
     'Rail-Me Express 002': 9,
@@ -27,7 +27,6 @@ TRAIN_DURATIONS = {
 }
 
 
-# Create models here
 class Booking(models.Model):
     user = models.ForeignKey('accounts_app.Passenger', on_delete=models.CASCADE, related_name='bookings')
     train = models.ForeignKey(Train, on_delete=models.CASCADE, related_name='bookings')
@@ -44,7 +43,7 @@ class Booking(models.Model):
             
         # Automatically compute arrival time if not provided
         if not self.arrival_time:
-            duration_hours = TRAIN_DURATIONS.get(self.train.name, 6)
+            duration_hours = TRAIN_DURATIONS.get(self.train.name, 10)
             self.arrival_time = self.departure_time + timedelta(hours=duration_hours)
         super().save(*args, **kwargs)
 
