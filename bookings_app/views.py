@@ -1,6 +1,6 @@
 from rest_framework import generics, permissions, status, serializers
 from .models import Booking, TRAIN_DURATIONS
-from .serializers import BookTrainSerializer, AvailableTrainSerializer
+from .serializers import BookTrainSerializer, AvailableTrainSerializer, AvailableServiceSerializer
 from admin_app.models import Train
 from rest_framework.response import Response
 from datetime import timedelta
@@ -8,6 +8,8 @@ from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from django.utils.dateparse import parse_datetime
+from services_app.models import Service
+
 
 class BookTrainView(generics.CreateAPIView):
     queryset = Booking.objects.all()
@@ -102,3 +104,10 @@ class CancelBookingView(APIView):
         )
         
 
+class AvailableServiceView(generics.ListAPIView):
+    queryset = Service.objects.all()
+    serializer_class = AvailableServiceSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    
+    

@@ -98,6 +98,12 @@ class BookTrainSerializer(serializers.ModelSerializer):
 class AvailableTrainSerializer(serializers.ModelSerializer):
     class Meta:
         model = Train
-        fields = ['train_name','image',  'departure_station', 'destination', 'arrival_station', 'price', 'seats_remaining']
+        fields = ['train_name', 'image',  'departure_station', 'destination', 'arrival_station', 'price', 'seats_remaining']
 
 
+class AvailableServiceSerializer(serializers.ModelSerializer):
+    train_name = serializers.CharField(source='train.train_name', read_only=True)
+
+    class Meta:
+        model = Service
+        fields = ['train_name', 'service_type', 'price']
