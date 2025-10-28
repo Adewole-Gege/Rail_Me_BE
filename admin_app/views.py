@@ -10,6 +10,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
 from accounts_app.models import Passenger
+from bookings_app.models import Booking
 
 
 # Create your views here.
@@ -142,4 +143,16 @@ class CommuterListView(generics.ListAPIView):
     authentication_classes = [AdminJWTAuthentication]  # restrict to admin token
     permission_classes = [permissions.IsAuthenticated]
     
+
+class TotalBookingsView(APIView):
+    authentication_classes = [AdminJWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        total_bookings = Booking.objects.count()
+        return Response(
+            {"total_bookings": total_bookings},
+            status=status.HTTP_200_OK
+        )
+        
 

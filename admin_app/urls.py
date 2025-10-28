@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (AdminRegistrationView, SendOtpView, VerifyOTPView, AdminLoginView, 
                     ForgotPasswordView, ResetPasswordView, TrainCreateView, TrainListView, TrainDeleteView,
-                    CommuterListView)
+                    CommuterListView, TotalBookingsView)
 
 urlpatterns = [
     path('register/', AdminRegistrationView.as_view(), name='admin-register'),
@@ -14,4 +14,5 @@ urlpatterns = [
     path('trains/', TrainListView.as_view(), name='train-list'),
     path('delete-train/<int:pk>/', TrainDeleteView.as_view(), name='delete-train'),
     path('commuters-list/', CommuterListView.as_view(), name='commuter-list'),
+    path('total-bookings/', TotalBookingsView.as_view(), name='total-bookings'),
 ]
