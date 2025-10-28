@@ -39,6 +39,7 @@ class Admin(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=True)
 
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['phone_number', 'first_name', 'last_name']
 
@@ -130,7 +131,7 @@ TRAIN_NAME_CHOICES = [
 
 
 class Train(models.Model):
-    name = models.CharField(max_length=100, choices=TRAIN_NAME_CHOICES)
+    train_name = models.CharField(max_length=100, choices=TRAIN_NAME_CHOICES)
     departure_station = models.CharField(max_length=100, choices=STATION_CHOICES)
     destination = models.CharField(max_length=100)
     arrival_station = models.CharField(max_length=100, choices=STATION_CHOICES)
@@ -143,7 +144,7 @@ class Train(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        unique_together = ('name', 'departure_station', 'destination')
+        unique_together = ('train_name', 'departure_station', 'destination')
     
     def save(self, *args, **kwargs):
         if not self.id:
@@ -152,5 +153,6 @@ class Train(models.Model):
         super().save(*args, **kwargs)
              
     def __str__(self):
-        return f"{self.name} ({self.departure_station} to {self.destination})"
+        return f"{self.train_name} ({self.departure_station} to {self.destination})"
+
 

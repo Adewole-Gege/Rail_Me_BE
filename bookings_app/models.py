@@ -1,6 +1,8 @@
 from django.db import models
 from admin_app.models import Train
 from datetime import timedelta
+from services_app.models import Service
+
 
 # Create models here
 TRAIN_DURATIONS = {
@@ -27,27 +29,47 @@ TRAIN_DURATIONS = {
 }
 
 
+SERVICE_CHOICES = [
+        ('reservation', 'Reservation'),
+        ('economy', 'Economy'),
+        ('business', 'Business'),
+    ]
+
+
 class Booking(models.Model):
     user = models.ForeignKey('accounts_app.Passenger', on_delete=models.CASCADE, related_name='bookings')
     train = models.ForeignKey(Train, on_delete=models.CASCADE, related_name='bookings')
+    service = models.CharField(max_length=20, choices=SERVICE_CHOICES, default='reservation')
     seats_booked = models.PositiveIntegerField(default=1)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=81500.00)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
     departure_time = models.DateTimeField()
     arrival_time = models.DateTimeField()
     booked_at = models.DateTimeField(auto_now_add=True)
     
     
     def save(self, *args, **kwargs):
-        if not self.price and self.train:
-            self.price = self.train.price
-            
-        # Automatically compute arrival time if not provided
-        if not self.arrival_time:
-            duration_hours = TRAIN_DURATIONS.get(self.train.name, 10)
+        # Get price per seat from Service
+        service_obj = Service.objects.filter(train=self.train, service_type=self.service).first()
+        if service_obj:
+            self.price = service_obj.price
+        else:
+            # fallback to reservation
+            reservation = Service.objects.filter(train=self.train, service_type='reservation').first()
+            if reservation:
+                self.price = reservation.price
+
+        # Calculate total price automatically
+        self.total_price = self.price * self.seats_booked
+
+        # Automatically calculate arrival time
+        if not self.arrival_time and self.train:
+            duration_hours = TRAIN_DURATIONS.get(self.train.train_name, 10)
             self.arrival_time = self.departure_time + timedelta(hours=duration_hours)
+
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.user} booked {self.train.name} at ({self.price} price)"
+        return f"{self.user} booked {self.train.train_name} ({self.service}) for {self.total_price}"
     
     

@@ -7,6 +7,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework_simplejwt.exceptions import AuthenticationFailed
 
 
 # Create your views here.
@@ -70,8 +71,8 @@ class AdminLoginView(APIView):
         if serializer.is_valid():
             admin = serializer.validated_data['admin']
             refresh = RefreshToken.for_user(admin)
-            
             refresh["admin_id"] = admin.id
+            
             access = refresh.access_token
             access["admin_id"] = admin.id
             
@@ -100,13 +101,16 @@ class ResetPasswordView(APIView):
     
 class AdminJWTAuthentication(JWTAuthentication):
     def get_user(self, validated_token):
+        admin_id = validated_token.get("admin_id")
+        
+        if not admin_id:
+            # Instead of generic Exception, raise DRF-friendly error
+            raise AuthenticationFailed("Invalid token: admin_id missing")
+
         try:
-            admin_id = validated_token.get("admin_id")
-            if not admin_id:
-                raise Exception("Token missing admin_id field")
             return Admin.objects.get(id=admin_id)
         except Admin.DoesNotExist:
-            raise Exception("Admin not found")
+            raise AuthenticationFailed("Admin not found")
         
         
 class TrainCreateView(generics.CreateAPIView):
@@ -123,4 +127,10 @@ class TrainListView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     
+class TrainDeleteView(generics.DestroyAPIView):
+    queryset = Train.objects.all()
+    serializer_class = TrainSerializer
+    authentication_classes = [AdminJWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
     
+

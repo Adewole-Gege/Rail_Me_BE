@@ -9,7 +9,6 @@ from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from django.utils.dateparse import parse_datetime
 
-
 class BookTrainView(generics.CreateAPIView):
     queryset = Booking.objects.all()
     serializer_class = BookTrainSerializer
@@ -19,21 +18,15 @@ class BookTrainView(generics.CreateAPIView):
         try:
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-            booking = serializer.save(user=request.user)
+            serializer.save()
 
-            return Response({
-                "message": "Train booked successfully.",
-                "train": booking.train.name,
-                "seats_booked": booking.seats_booked,
-                "seats_remaining": booking.train.seats_remaining,
-            }, status=status.HTTP_201_CREATED)
+            return Response({"message": "Train booked successfully."}, status=status.HTTP_201_CREATED)
 
         except serializers.ValidationError as e:
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 
 class AvailableTrainsView(generics.ListAPIView):

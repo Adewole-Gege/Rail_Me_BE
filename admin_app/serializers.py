@@ -207,11 +207,11 @@ class TrainSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Train
-        fields = ['name', 'departure_station', 'destination', 'arrival_station', 'price', 'image', 'seats_remaining', 'created_at']
+        fields = ['train_name', 'departure_station', 'destination', 'arrival_station', 'price', 'image', 'seats_remaining', 'created_at']
         read_only_fields = ['arrival_time']
         
         extra_kwargs = {
-            'name': {'error_messages': {'required': 'Make a choice from the available trains'}},
+            'train_name': {'error_messages': {'required': 'Make a choice from the available trains'}},
             'departure_station': {'error_messages': {'required': 'Please select a departure station.'}},
             'destination': {'error_messages': {'required': 'Please select a destination station.'}},
             'arrival_station': {'error_messages': {'required': 'Please provide an arrival station.'}},
@@ -220,7 +220,7 @@ class TrainSerializer(serializers.ModelSerializer):
         }
         
     def validate(self, attrs):
-        name = attrs.get('name')
+        train_name = attrs.get('train_name')
         departure_station = attrs.get('departure_station')
         destination = attrs.get('destination')
         image = attrs.get('image')
@@ -231,7 +231,7 @@ class TrainSerializer(serializers.ModelSerializer):
         if not image:
             raise serializers.ValidationError({"image": "An image is required for every train."})
         # If key details are missing, stop validation early
-        if not name or not departure_station or not destination:
+        if not train_name or not departure_station or not destination:
             return attrs
         # Define allowed routes
         valid_routes = {
@@ -258,37 +258,37 @@ class TrainSerializer(serializers.ModelSerializer):
         }
         # Validate only if train name exists in allowed routes
         
-        if name not in valid_routes:
+        if train_name not in valid_routes:
             raise serializers.ValidationError({
-                "name": f"'{name}' is not a valid train route name."
+                "name": f"'{train_name}' is not a valid train route name."
                 })
         
-        correct_departure, correct_destination = valid_routes[name]
+        correct_departure, correct_destination = valid_routes[train_name]
         
         # Check departure station
         if correct_departure.lower() not in departure_station.lower():
             raise serializers.ValidationError({
-                "departure_station": f"The departure station for {name} must be from {correct_departure}."
+                "departure_station": f"The departure station for {train_name} must be from {correct_departure}."
                 })
         # Prevent duplication of train for same route  
         if Train.objects.filter(
-            name=name,
+            train_name=train_name,
             departure_station=departure_station,
             destination=destination
         ).exists():
             raise serializers.ValidationError(
-                {"detail": f"A train named '{name}' already runs from {departure_station} to {destination}."}
+                {"detail": f"A train named '{train_name}' already runs from {departure_station} to {destination}."}
             )
             
         # Check destination field
         if correct_destination.lower() not in destination.lower():
             raise serializers.ValidationError({
-                "destination": f"The destination for {name} must be to {correct_destination}."
+                "destination": f"The destination for {train_name} must be to {correct_destination}."
                 })
             # Check arrival station matches destination city
         if correct_destination.lower() not in arrival_station.lower():
             raise serializers.ValidationError({
-                "arrival_station": f"The arrival station for {name} must be located in {correct_destination}."
+                "arrival_station": f"The arrival station for {train_name} must be located in {correct_destination}."
                 })
             
         # Prevent same departure and destination
