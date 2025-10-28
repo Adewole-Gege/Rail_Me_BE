@@ -58,4 +58,5 @@ class ServiceDeleteView(generics.DestroyAPIView):
             status=status.HTTP_200_OK
         )
  
-        
+ 
+#
