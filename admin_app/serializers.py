@@ -11,6 +11,8 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.contrib.auth.hashers import check_password
 import os
+from accounts_app.models import Passenger
+
 
 
 class AdminRegistrationSerializer(serializers.ModelSerializer):
@@ -330,4 +332,11 @@ class TrainSerializer(serializers.ModelSerializer):
         train = Train.objects.create(**validated_data)
         return train
 
+
+class CommuterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Passenger
+        fields = ['id', 'email', 'phone_number', 'first_name', 'last_name', 'date_joined']
+        read_only_fields = fields
+        
 

@@ -1,6 +1,7 @@
 from rest_framework import generics, permissions, status
 from .models import Admin, Train, OTP
-from .serializers import TrainSerializer, AdminRegistrationSerializer, AdminLoginSerializer, OTPRequestSerializer, ForgotPasswordSerializer, ResetPasswordSerializer
+from .serializers import (TrainSerializer, AdminRegistrationSerializer, AdminLoginSerializer, OTPRequestSerializer, 
+                          ForgotPasswordSerializer, ResetPasswordSerializer, CommuterSerializer)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -8,6 +9,7 @@ from django.utils import timezone
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
+from accounts_app.models import Passenger
 
 
 # Create your views here.
@@ -131,6 +133,13 @@ class TrainDeleteView(generics.DestroyAPIView):
     queryset = Train.objects.all()
     serializer_class = TrainSerializer
     authentication_classes = [AdminJWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    
+
+class CommuterListView(generics.ListAPIView):
+    queryset = Passenger.objects.all()
+    serializer_class = CommuterSerializer
+    authentication_classes = [AdminJWTAuthentication]  # restrict to admin token
     permission_classes = [permissions.IsAuthenticated]
     
 
